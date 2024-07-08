@@ -1,0 +1,11 @@
+**/.dockerignore
+**/eslintignore
+**/package-lock.json
+**/node_modules
+**/.next
+**/.vscode
+**/dist
+README.md
+**/.gitignore
+**/docker-compose*
+**/Dockerfile*
