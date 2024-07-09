@@ -1,6 +1,5 @@
 **/.dockerignore
 **/eslintignore
-**/package-lock.json
 **/node_modules
 **/.next
 **/.vscode
