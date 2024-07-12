@@ -1,43 +1,27 @@
 services:
   app:
     image: homepedia_app:latest
-    networks:
-      - app-network
     env_file:
       - .env
+    ports:
+      - '3000:3000'
     deploy:
       replicas: 1
-      update_config:
-        parallelism: 2
-        delay: 10s
-        failure_action: rollback
-        order: start-first
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 3s
-      timeout: 5s
-      retries: 6
+      restart_policy:
+        condition: on-failure
 
   nginx:
     image: nginx:1.23.4-alpine
+    env_file:
+      - .env
     ports:
-      - '8081:8081'
+      - '${NGINX_PORT}:${NGINX_PORT}'
     volumes:
       - ./nginx/default_production.conf:/etc/nginx/templates/default.conf.template:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    networks:
-      - app-network
-    env_file:
-      - .env
+      - ./nginx/wait_for_app_start.sh:/wait_for_app_start.sh
+    entrypoint: /bin/sh -c "./wait_for_app_start.sh ${APP_FULL_DOMAIN}"
     deploy:
       replicas: 1
-      update_config:
-        parallelism: 2
-        delay: 10s
-        failure_action: rollback
-        order: start-first
-    entrypoint: ["sh", "-c", "while ! curl -s http://localhost:3000; do sleep 2; done; nginx -g 'daemon off;'"]
-
-networks:
-  app-network:
-    driver: overlay
+      restart_policy:
+        condition: on-failure
